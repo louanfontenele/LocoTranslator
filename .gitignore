@@ -55,8 +55,8 @@ cover/
 *.mo
 *.pot
 *.po
-progresso.json
 progress.json
+*_progress.json
 
 # Django stuff:
 *.log
