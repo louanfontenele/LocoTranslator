@@ -14,7 +14,7 @@ except ImportError:
     print("Error: pyreadline3 not installed. Please install it using 'pip install pyreadline3'")
     readline = None
 
-# Bind the TAB key to auto-completion if readline is available
+# Bind the TAB key to auto-completion if readline is available.
 if readline:
     readline.parse_and_bind("tab: complete")
 
@@ -53,10 +53,54 @@ def clear_console():
     else:
         os.system("clear")
 
+def format_elapsed_time(seconds):
+    """
+    Converts a duration in seconds into a formatted string displaying years, months, days, hours, minutes, and seconds.
+    
+    Parameters:
+        seconds (float): The total number of seconds.
+    
+    Returns:
+        str: A formatted string.
+    """
+    sec = int(seconds)
+    # Define approximate conversion factors.
+    seconds_per_year = 31536000  # 365 days
+    seconds_per_month = 2592000  # 30 days
+    seconds_per_day = 86400
+    seconds_per_hour = 3600
+    seconds_per_minute = 60
+
+    years = sec // seconds_per_year
+    sec %= seconds_per_year
+    months = sec // seconds_per_month
+    sec %= seconds_per_month
+    days = sec // seconds_per_day
+    sec %= seconds_per_day
+    hours = sec // seconds_per_hour
+    sec %= seconds_per_hour
+    minutes = sec // seconds_per_minute
+    sec %= seconds_per_minute
+
+    parts = []
+    if years:
+        parts.append(f"{years} year{'s' if years != 1 else ''}")
+    if months:
+        parts.append(f"{months} month{'s' if months != 1 else ''}")
+    if days:
+        parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    parts.append(f"{sec} second{'s' if sec != 1 else ''}")
+    
+    return ", ".join(parts)
+
 def translate_string(text, target_language, context):
     """
     Translates the given text into the target language using the provided context.
-    Measures and prints the elapsed time for the API call.
+    Measures the elapsed time for the API call but does not print it for each string.
 
     Parameters:
         text (str): The text to be translated.
@@ -82,9 +126,7 @@ def translate_string(text, target_language, context):
             temperature=0.5,
         )
         translation = response.choices[0].message['content'].strip()
-        elapsed_time = time.time() - start_time
-        print(f"Translation took {elapsed_time:.2f} seconds.")
-        # If the translation appears invalid, use the original text.
+        # Do not print per-string translation time.
         if ("no need to be corrected" in translation.lower() or
             "reference to" in translation.lower() or
             re.match(r"^[^a-zA-Z]*$", translation)):
@@ -210,8 +252,9 @@ def main():
             po.save(translated_file_name)
 
     overall_elapsed = time.time() - overall_start_time
+    formatted_time = format_elapsed_time(overall_elapsed)
     print(f"Translation and correction complete. File saved as '{translated_file_name}'.")
-    print(f"Total translation time: {overall_elapsed:.2f} seconds.")
+    print(f"Total translation time: {formatted_time}.")
 
 if __name__ == "__main__":
     main()
